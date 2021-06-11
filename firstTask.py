@@ -3,8 +3,6 @@ import pandas as pd
 
 dict_from_csv = pd.read_csv('data.csv',sep=";").to_dict()
 
-
-
 dict = {}
 
 for i in dict_from_csv["Customer"]:
