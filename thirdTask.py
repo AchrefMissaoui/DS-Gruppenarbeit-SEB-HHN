@@ -1,50 +1,42 @@
-import queue
+from queue import PriorityQueue
 
 import pandas as pd
+
+
 class ExcelHandler:
     dict = {}
+
     def __init__(self):
-        dict_from_csv = pd.read_csv('data.csv', sep=";").to_dict()
-        for i in dict_from_csv["Customer"]:
-            self.dict[dict_from_csv["Customer"][i]] = {
-                "Country": dict_from_csv["Country"][i],
-                "Revenue": dict_from_csv["Revenue"][i],
-                "Currency": dict_from_csv["Currency"][i]
-            }
+        self.dict = pd.read_csv('data.csv', sep=";", index_col="Customer").to_dict("index")
 
     def printDictionary(self):
-        new_dict={}
+        new_dict = {}
         for customer in self.dict:
-            new_dict[customer]=self.dict[customer]['Revenue']
+            new_dict[customer] = self.dict[customer]['Revenue']
         print(new_dict)
-    def getValue(self,customer):
-        print("Wert für",customer,"ist",self.dict[customer]['Revenue'])
 
-    def writeDictionnary(self,fileName):
+    def getValue(self, customer):
+        print("Wert für", customer, "ist", self.dict[customer]['Revenue'])
+
+    def writeDictionnary(self, fileName):
         df = pd.DataFrame(self.dict.items())
-        df.to_csv(fileName+".csv",header=None,sep=";",index=None)
+        df.to_csv(fileName + ".csv", header=None, sep=";", index=None)
 
-    def countCurrency(self,currency):
+    def countCurrency(self, currency):
         counter = 0
         for customer in self.dict:
             if self.dict[customer]["Currency"] == currency:
                 counter = counter + 1
-        print("Die Währung",currency,"kommt insgesamt",counter,"vor.")
-
+        print("Die Währung", currency, "kommt insgesamt", counter, "vor.")
+        return counter
 
     def printCurrencies(self):
-        currencyDict = {}
-        currencyQueue = queue.PriorityQueue()
+        currencies = set()
         for customer in self.dict:
-            if self.dict[customer]["Currency"] not in currencyDict:
-                currencyDict[self.dict[customer]["Currency"]] = 1
-            else :
-                currencyDict[self.dict[customer]["Currency"]] +=1
-
-        for item in currencyDict:
-            currencyQueue.put((item,currencyDict[item]))
-
-
+            currencies.add(self.dict[customer]["Currency"])
+        currencyQueue = PriorityQueue()
+        for currency in currencies:
+            currencyQueue.put((self.countCurrency(currency), currency))
         while not currencyQueue.empty():
             print(currencyQueue.get())
 
